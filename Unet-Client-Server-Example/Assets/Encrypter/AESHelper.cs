@@ -1,10 +1,12 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 
-namespace Diffie_Hellman
+namespace Assets.Encrypter
 {
-	public class SimpleAES
+	public class AESHelper
 	{
 		RijndaelManaged rm = null;
 
@@ -13,7 +15,7 @@ namespace Diffie_Hellman
 
 		private System.Text.UTF8Encoding UTFEncoder;
 
-		public SimpleAES(byte[] key, byte[] vector)
+		public AESHelper(byte[] key, byte[] vector)
 		{
 			//This is our encryption method
 			rm = new RijndaelManaged();
@@ -24,18 +26,6 @@ namespace Diffie_Hellman
 
 			//Used to translate bytes to text and vice versa
 			UTFEncoder = new System.Text.UTF8Encoding();
-
-		}
-
-
-
-		/// Generates a unique encryption vector
-		static public byte[] GenerateEncryptionVector()
-		{
-			//Generate a Vector
-			RijndaelManaged rm = new RijndaelManaged();
-			rm.GenerateIV();
-			return rm.IV;
 		}
 
 		public void SetIV(byte[] iv)

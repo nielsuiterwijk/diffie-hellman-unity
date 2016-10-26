@@ -30,8 +30,8 @@ namespace Diffie_Hellman
 
 		static void Main(string[] args)
 		{
-			bool result = publicModulo.IsProbablePrime(ushort.MaxValue / 10);
-			Console.WriteLine(publicModulo.ToString() + " is a " + (result ? "prime" : "not a prime!"));
+			//bool result = publicModulo.IsProbablePrime(ushort.MaxValue / 10);
+			//Console.WriteLine(publicModulo.ToString() + " is a " + (result ? "prime" : "not a prime!"));
 
 
 			Console.WriteLine("Alice secret: " + aliceSecret.ToString());
@@ -50,11 +50,7 @@ namespace Diffie_Hellman
 
 			byte[] hashedSharedKey = SHA256.Create().ComputeHash(aliceSharedSecret.GetBytes());
 
-			byte[] sharedShortKey = new byte[256 / 8];
-
-			Array.Copy(hashedSharedKey, sharedShortKey, 256 / 8);
-
-			AESProfiler.Run(new BigInteger(sharedShortKey));
+			AESProfiler.Run(new BigInteger(hashedSharedKey));
 
 			Console.ReadKey();
 
