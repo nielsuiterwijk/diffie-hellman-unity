@@ -3,6 +3,7 @@ using Numerics;
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace Diffie_Hellman
 {
@@ -27,32 +28,275 @@ namespace Diffie_Hellman
 		static BigInteger aliceSecret =  BigInteger.GenerateRandom(128);
 		static BigInteger bobSecret = BigInteger.GenerateRandom(128);
 
+		static RingBuffer<int>  ringBuffer = new RingBuffer<int>(16);
+
+		static int globalCounter = 123340;
 
 		static void Main(string[] args)
 		{
 			//bool result = publicModulo.IsProbablePrime(ushort.MaxValue / 10);
 			//Console.WriteLine(publicModulo.ToString() + " is a " + (result ? "prime" : "not a prime!"));
 
+			int loopCountCopy = globalCounter / 2;
+			loopCountCopy += 10;
 
-			Console.WriteLine("Alice secret: " + aliceSecret.ToString());
-			Console.WriteLine("Bob secret:   " + bobSecret.ToString());
 
-			Console.WriteLine("public modulo:   " + publicModulo.ToString());
+			object obj = new object();
 
-			BigInteger aliceSharedSecret = AlicePhase2(BobPhase1());
-			BigInteger bobSharedSecret = BobPhase2(AlicePhase1());
+			new Thread(() =>
+			{
+				int loopCount = loopCountCopy * 10;
+				int prevNumber = globalCounter + 1;
 
-			Console.WriteLine("Alice shared: " + aliceSharedSecret.ToString());
-			Console.WriteLine("Bob shared:   " + bobSharedSecret.ToString());
+				while (true)
+				{
+					int number = 0;
+					bool result = ringBuffer.Dequeue(out number);
 
-			bool equal = aliceSharedSecret == bobSharedSecret;
-			Console.WriteLine("The shared secret is equal: " + equal.ToString());
+					if (!result)
+					{
+						continue;
+					}
 
-			byte[] hashedSharedKey = SHA256.Create().ComputeHash(aliceSharedSecret.GetBytes());
+#if DEBUG
 
-			AESProfiler.Run(new BigInteger(hashedSharedKey));
+					if (prevNumber - 1 != number)
+					{
+						Console.WriteLine("incorrect number read, probably an overflow : " + prevNumber + " vs " + number);
+
+						if (number == default(int))
+						{
+							lock (obj)
+							{
+								Console.WriteLine("result was true, but number read was incorrect");
+							}
+
+							break;
+						}
+
+					}
+
+#endif
+					Console.WriteLine("correct number read: " + number);
+
+					prevNumber = number;
+
+					if (prevNumber == 0 && number == 0)
+					{
+						break;
+					}
+
+
+				}
+
+				Console.WriteLine("consumer done 1");
+
+			}).Start();
+
+			new Thread(() =>
+			{
+				int loopCount = loopCountCopy;
+
+				Console.WriteLine("start producer 1");
+
+				while (loopCount > 0)
+				{
+					lock (obj)
+					{
+						int numberToEnqueue = 0;
+
+						do
+						{
+							//Note: primitives are guaranteed to be atomic reads.
+							numberToEnqueue = globalCounter;
+						}
+						while (Interlocked.CompareExchange(ref globalCounter, numberToEnqueue - 1, numberToEnqueue) != numberToEnqueue);
+
+						ringBuffer.Enqueue(numberToEnqueue);
+						loopCount--;
+
+						if (numberToEnqueue <= 0)
+						{
+							break;
+						}
+
+						//Thread.Sleep(0);
+					}
+				}
+
+				Console.WriteLine("producer done 1");
+
+
+			}).Start();
+
+			new Thread(() =>
+			{
+				int loopCount = loopCountCopy;
+
+				Console.WriteLine("start producer 2");
+
+				while (loopCount > 0)
+				{
+					lock (obj)
+					{
+						int numberToEnqueue = 0;
+
+						do
+						{
+							//Note: primitives are guaranteed to be atomic reads.
+							numberToEnqueue = globalCounter;
+						}
+						while (Interlocked.CompareExchange(ref globalCounter, numberToEnqueue - 1, numberToEnqueue) != numberToEnqueue);
+
+						ringBuffer.Enqueue(numberToEnqueue);
+						loopCount--;
+
+						if (numberToEnqueue <= 0)
+						{
+							break;
+						}
+
+						//Thread.Sleep(0);
+					}
+				}
+
+				Console.WriteLine("producer done 2");
+
+
+			}).Start();
+
+			new Thread(() =>
+			{
+				int loopCount = loopCountCopy;
+
+				Console.WriteLine("start producer 3");
+
+				while (loopCount > 0)
+				{
+					lock (obj)
+					{
+						int numberToEnqueue = 0;
+
+						do
+						{
+							//Note: primitives are guaranteed to be atomic reads.
+							numberToEnqueue = globalCounter;
+						}
+						while (Interlocked.CompareExchange(ref globalCounter, numberToEnqueue - 1, numberToEnqueue) != numberToEnqueue);
+
+						ringBuffer.Enqueue(numberToEnqueue);
+						loopCount--;
+
+						if (numberToEnqueue <= 0)
+						{
+							break;
+						}
+
+						//Thread.Sleep(0);
+					}
+				}
+
+				Console.WriteLine("producer done 3");
+
+
+			}).Start();
+
+			new Thread(() =>
+			{
+				int loopCount = loopCountCopy;
+
+				Console.WriteLine("start producer 4");
+
+				while (loopCount > 0)
+				{
+					lock (obj)
+					{
+						int numberToEnqueue = 0;
+
+						do
+						{
+							//Note: primitives are guaranteed to be atomic reads.
+							numberToEnqueue = globalCounter;
+						}
+						while (Interlocked.CompareExchange(ref globalCounter, numberToEnqueue - 1, numberToEnqueue) != numberToEnqueue);
+
+						ringBuffer.Enqueue(numberToEnqueue);
+						loopCount--;
+
+						if (numberToEnqueue <= 0)
+						{
+							break;
+						}
+
+						//Thread.Sleep(0);
+					}
+				}
+
+				Console.WriteLine("producer done 4");
+
+
+			}).Start();
+
+			new Thread(() =>
+			{
+				int loopCount = loopCountCopy;
+
+				Console.WriteLine("start producer 5");
+
+				while (loopCount > 0)
+				{
+					lock (obj)
+					{
+						int numberToEnqueue = 0;
+
+						do
+						{
+							//Note: primitives are guaranteed to be atomic reads.
+							numberToEnqueue = globalCounter;
+						}
+						while (Interlocked.CompareExchange(ref globalCounter, numberToEnqueue - 1, numberToEnqueue) != numberToEnqueue);
+
+						ringBuffer.Enqueue(numberToEnqueue);
+						loopCount--;
+
+						if (numberToEnqueue <= 0)
+						{
+							break;
+						}
+
+						//Thread.Sleep(0);
+					}
+				}
+
+				Console.WriteLine("producer done 5");
+
+
+			}).Start();
+
+
+
+
+			/*  Console.WriteLine("Alice secret: " + aliceSecret.ToString());
+			    Console.WriteLine("Bob secret:   " + bobSecret.ToString());
+
+			    Console.WriteLine("public modulo:   " + publicModulo.ToString());
+
+			    BigInteger aliceSharedSecret = AlicePhase2(BobPhase1());
+			    BigInteger bobSharedSecret = BobPhase2(AlicePhase1());
+
+			    Console.WriteLine("Alice shared: " + aliceSharedSecret.ToString());
+			    Console.WriteLine("Bob shared:   " + bobSharedSecret.ToString());
+
+			    bool equal = aliceSharedSecret == bobSharedSecret;
+			    Console.WriteLine("The shared secret is equal: " + equal.ToString());
+
+			    byte[] hashedSharedKey = SHA256.Create().ComputeHash(aliceSharedSecret.GetBytes());
+
+			    AESProfiler.Run(new BigInteger(hashedSharedKey));*/
 
 			Console.ReadKey();
+
+			int a = 0;
 
 		}
 
